@@ -12,6 +12,10 @@ export default new Router({
     // 此处不采用传统的写法
     movieRouter,
     cinemaRouter,
-    mineRouter
+    mineRouter,
+    {
+      path:'/*',
+      redirect:'/movie'
+    }
   ]
 })
