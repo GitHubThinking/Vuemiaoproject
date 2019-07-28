@@ -86,12 +86,12 @@ export default {
   top: 0;
   left: 0;
   z-index: 100;
-  min-height: 100%;
+  height: 100%;
   width: 100%;
   background: #fff;
 }
 #detailContent.slide-enter-active {
-  animation: 3s slideMove;
+  animation: 1s slideMove;
 }
 @keyframes slideMove {
   0% {
