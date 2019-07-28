@@ -5,10 +5,10 @@
       <ul>
         <li class="pullDowm">{{pullDownMsg}}</li>
         <li v-for="(movie,index) in movieList" :key="index">
-          <div class="pic_show" @tap="handleToDetail">
+          <div class="pic_show" @tap="handleToDetail(movie.id)">
             <img :src="movie.img | setWH('128.280')" />
           </div>
-          <div class="info_list">
+          <div class="info_list" @tap="handleToDetail(movie.id)">
             <h2>{{movie.nm}}</h2>
             <p>
               观众评
@@ -49,8 +49,8 @@ export default {
     });
   },
   methods: {
-    handleToDetail() {
-      console.log(123);
+    handleToDetail(movieId) {
+      this.$router.push('/movie/detail/1/'+movieId) 
     },
     handleToScroll(pos) {
       if (pos.y > 30) {
