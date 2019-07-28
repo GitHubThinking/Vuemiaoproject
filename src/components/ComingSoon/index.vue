@@ -1,5 +1,7 @@
 <template>
 <div class="movie_body">
+  <Loading v-if="isLoading"/>
+  <scroller v-else>
     <ul>
       <li>
         <div class="pic_show">
@@ -17,6 +19,7 @@
         <div class="btn_mall">购票</div>
       </li>
     </ul>
+  </scroller>
   </div>
 </template>
 
@@ -24,13 +27,16 @@
 export default {
     name:'ComingSoon',
     data () {
-        return {}
-    }
+        return {
+          isLoading:true
+        }
+    },
+    
 }
 </script>
 
 <style scoped>
-#content .movie_body{ flex:1; overflow:auto;}
+#content .movie_body{ flex:1; overflow:auto;margin-top:95px;}
 .movie_body ul{ margin:0 12px; overflow: hidden;}
 .movie_body ul li{ margin-top:12px; display: flex; align-items:center; border-bottom: 1px #e6e6e6 solid; padding-bottom: 10px;}
 .movie_body .pic_show{ width:64px; height: 90px;}

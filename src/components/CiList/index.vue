@@ -1,76 +1,112 @@
 <template>
   <div class="cinema_body">
-    <ul>
-      <li v-for="(cinema,index) in cinemaList" :key="index">
-        <div>
-          <span>{{cinema.nm}}</span>
-          <span class="q">
-            <span class="price">{{cinema.sellPrice}}</span> 元起
-          </span>
-        </div>
-        <div class="address">
-          <span>{{cinema.addr}}</span>
-          <span>{{cinema.distance}}</span>
-        </div>
-        <div class="card">
-          <div v-for="(value,key) in cinema.tag" v-if="value === 1" :key="key" :class="key | getClass">{{key | filterTag}}</div>
-        </div>
-      </li>
-    </ul>
+    <Loading v-if="isLoading" />
+    <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
+      <ul>
+        <li>{{pullDownMsg}}</li>
+        <li v-for="(cinema,index) in cinemaList" :key="index">
+          <div>
+            <span>{{cinema.nm}}</span>
+            <span class="q">
+              <span class="price">{{cinema.sellPrice}}</span> 元起
+            </span>
+          </div>
+          <div class="address">
+            <span>{{cinema.addr}}</span>
+            <span>{{cinema.distance}}</span>
+          </div>
+          <div class="card">
+            <div v-for="(value,key) in cinema.tag" v-if="value === 1" :key="key" :class="key | getClass">{{key | filterTag}}</div>
+          </div>
+        </li>
+      </ul>
+    </scroller>
   </div>
 </template>
 
 <script>
 export default {
-    name:'CiList',
-    data () {
-        return {
-			cinemaList:[]
-		}
-	},
-	mounted(){
-		this.axios.get('/api/cinemaList?cityId=10').then(res=>{
-			if(res.data.msg === 'ok'){
-				this.cinemaList = res.data.data.cinemas
-			}
-		})
-	},
-	filters:{
-		filterTag(val){
-			let arr = [
-				{key:'allowRefund',value:'改签'},
-				{key:'endorse',value:'退'},
-				{key:'sell',value:'折扣卡'},
-				{key:'snack',value:'小吃'},
-			]
-			for(let i = 0;i<arr.length;i++){
-				if(val === arr[i].key){
-					return arr[i].value
-				}
-			}
-			return ''
-		},
-		getClass(val){
-			let arr = [
-				{key:'allowRefund',value:'or'},
-				{key:'endorse',value:'or'},
-				{key:'sell',value:'bl'},
-				{key:'snack',value:'bl'},
-			]
-			for(let i = 0;i<arr.length;i++){
-				if(val === arr[i].key){
-					return arr[i].value
-				}
-			}
-			return ''
-		}
-	}
-}
+  name: "CiList",
+  data() {
+    return {
+      cinemaList: [],
+      isLoading:true,
+      pullDownMsg:'',
+      preCityid:-1
+    };
+  },
+  activated() {
+    var cityId = this.$store.state.city.id
+    if( this.preCityid === cityId){return ;}
+    this.isLoading = true
+    this.axios.get("/api/cinemaList?cityId="+cityId).then(res => {
+      if (res.data.msg === "ok") {
+        this.cinemaList = res.data.data.cinemas;
+        this.isLoading = false;
+        this.preCityid = cityId
+      }
+    });
+  },
+  filters: {
+    filterTag(val) {
+      let arr = [
+        { key: "allowRefund", value: "改签" },
+        { key: "endorse", value: "退" },
+        { key: "sell", value: "折扣卡" },
+        { key: "snack", value: "小吃" }
+      ];
+      for (let i = 0; i < arr.length; i++) {
+        if (val === arr[i].key) {
+          return arr[i].value;
+        }
+      }
+      return "";
+    },
+    getClass(val) {
+      let arr = [
+        { key: "allowRefund", value: "or" },
+        { key: "endorse", value: "or" },
+        { key: "sell", value: "bl" },
+        { key: "snack", value: "bl" }
+      ];
+      for (let i = 0; i < arr.length; i++) {
+        if (val === arr[i].key) {
+          return arr[i].value;
+        }
+      }
+      return "";
+    }
+  },
+  methods: {
+    handleToDetail() {
+      console.log(123);
+    },
+    handleToScroll(pos) {
+      if (pos.y > 30) {
+        this.pullDownMsg = "正在更新";
+      }
+    },
+    handleToTouchEnd(pos) {
+      if (pos.y > 30) {
+        this.pullDownMsg = "更新成功";
+        this.axios.get("/api/cinemaList?cityId=10").then(res => {
+          if (res.data.msg === "ok") {
+            setTimeout(() => {
+              this.cinemaList = res.data.data.cinemas;
+              this.pullDownMsg = "";
+            }, 1000);
+          }
+        });
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
-#content .cinema_body {
-  flex: 1;
+.cinema_body {
+  width: 100%;
+  height: 820px;
   overflow: auto;
 }
 .cinema_body ul {

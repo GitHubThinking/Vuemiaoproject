@@ -1,28 +1,34 @@
 <template>
   <div class="city_body">
     <div class="city_list">
-      <div class="city_hot">
-        <h2>热门城市</h2>
-        <ul class="clearfix">
-          <li v-for="(hotCity,index) in hotList" :key="index">{{hotCity.nm}}</li>
-        </ul>
-      </div>
-      <div class="city_sort" ref="city_sort">
-        <div v-for="(city,index) in cityList" :key="index">
-          <h2>{{city.index}}</h2>
-          <ul>
-            <li v-for="c in city.list" :key="c.id">{{c.nm}}</li>
-          </ul>
+      <Loading v-if="isLoading" />
+
+      <scroller v-else ref="city_List" :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
+
+        <div>
+          <div>{{pullDownMsg}}</div>
+          <!--样式设计的时候就有问题 -->
+          <div class="city_hot">
+            <h2>热门城市</h2>
+            <ul class="clearfix">
+              <li v-for="(hotCity,index) in hotList" :key="index" @tap="handleToCity(hotCity.nm,hotCity.id)">{{hotCity.nm}}</li>
+            </ul>
+          </div>
+          <div class="city_sort" ref="city_sort">
+            <div v-for="(city,index) in cityList" :key="index">
+              <h2>{{city.index}}</h2>
+              <ul>
+                <li v-for="c in city.list" :key="c.id" @tap="handleToCity(c.nm,c.id)">{{c.nm}}</li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      </scroller>
+
     </div>
     <div class="city_index">
       <ul>
-        <li
-          v-for="(item,index) in cityList"
-          :key="item.index"
-          @touchstart="handleToIndex(index)"
-        >{{item.index}}</li>
+        <li v-for="(item,index) in cityList" :key="item.index" @touchstart="handleToIndex(index)">{{item.index}}</li>
       </ul>
     </div>
   </div>
@@ -34,19 +40,35 @@ export default {
   data() {
     return {
       cityList: [],
-      hotList: []
+      hotList: [],
+      time: 0,
+      pullDownMsg: "",
+      isLoading: true
     };
   },
   mounted() {
-    this.axios.get("/api/cityList").then(res => {
-      let msg = res.data.msg;
-      if (msg == "ok") {
-        let cities = res.data.data.cities,
-          { cityList, hotList } = this.formatCityList(cities);
-        this.cityList = cityList;
-        this.hotList = hotList;
-      }
-    });
+    let cityList = window.localStorage.getItem("cityList"),
+      hotList = window.localStorage.getItem("hotList");
+
+    if (cityList && hotList) {
+      this.hotList = JSON.parse(hotList);
+      this.cityList = JSON.parse(cityList);
+      this.isLoading = false;
+    } else {
+      this.axios.get("/api/cityList").then(res => {
+        let msg = res.data.msg;
+        if (msg == "ok") {
+          let cities = res.data.data.cities,
+            { cityList, hotList } = this.formatCityList(cities);
+          this.cityList = cityList;
+          this.hotList = hotList;
+          this.isLoading = false;
+          window.localStorage.setItem("cityList", JSON.stringify(cityList));
+          window.localStorage.setItem("hotList", JSON.stringify(hotList));
+          console.log(123);
+        }
+      });
+    }
   },
   methods: {
     formatCityList(cities) {
@@ -91,8 +113,43 @@ export default {
     },
 
     handleToIndex(index) {
-        let h2 = this.$refs.city_sort.getElementsByTagName('h2')
-        document.documentElement.scrollTop = h2[index].offsetTop - 95
+      let h2 = this.$refs.city_sort.getElementsByTagName("h2");
+      //原生方法
+      //  document.documentElement.scrollTop = h2[index].offsetTop - 95;
+
+      //尝试一下利用better-scroll插件进行,不准确，还是用原生方式,有可能我的代码出现问题了
+      // console.log(h2[index].offsetTop-95)
+      if (this.time === 0) {
+        this.$refs.city_List.toScrollTop(-(h2[index].offsetTop - 95));
+      } else {
+        this.$refs.city_List.toScrollTop(-h2[index].offsetTop);
+      }
+
+      this.time++;
+    },
+    handleToScroll(pos) {
+      if (pos.y > 30) {
+        this.pullDownMsg = "正在更新";
+      }
+    },
+    handleToTouchEnd(pos) {
+      if (pos.y > 30) {
+        this.pullDownMsg = "更新成功";
+        this.axios.get("/api/cityList").then(res => {
+          if (res.data.msg === "ok") {
+            let cities = res.data.data.cities,
+              { cityList, hotList } = this.formatCityList(cities);
+            this.cityList = cityList;
+            this.hotList = hotList;
+          }
+        });
+      }
+    },
+    handleToCity(nm, id) {
+      this.$store.commit("CITY_INFO", { nm, id }); //此处不用谢city/
+      window.localStorage.setItem('nowNM',nm)
+      window.localStorage.setItem('nowID',id)
+      this.$router.push("/movie/nowPlaying");
     }
   }
 };
@@ -105,7 +162,8 @@ export default {
   width: 100%;
 }
 .city_body .city_list {
-  flex: 1;
+  width: 100%;
+  height: 820px;
   overflow: auto;
   background: #fff5f0;
 }
