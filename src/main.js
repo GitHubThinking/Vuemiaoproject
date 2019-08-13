@@ -10,6 +10,10 @@ Vue.filter('setWH', (url, arg) => {
   return url.replace(/w\.h/, arg) // 因为url里面有w.h，座椅通过滤重新设置
 })
 
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(ElementUI);
+
 import Scroller from '@/components/Scroller'
 Vue.component('Scroller',Scroller)
 
