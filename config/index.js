@@ -5,12 +5,23 @@
 const path = require('path')
 
 module.exports = {
+  publicPath:'/miaoproject',
   dev: {
 
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
+      // 本地接口先写在上面
+      '/api2':{
+        target:'http://localhost:3000',
+        changeOrigin: true,
+        secure: false, // 是否使用https
+        pathRewrith: {
+          '^/api2': '/api2'
+          // 这里裂解为使用/api代替target里面的地址'http://39.97.33.178'，后面的组件直接用api代替
+        }
+      },
       '/api': {
         target: 'http://39.97.33.178', // 跨域地址
         changeOrigin: true, // 是否跨域
@@ -20,6 +31,8 @@ module.exports = {
           // 这里裂解为使用/api代替target里面的地址'http://39.97.33.178'，后面的组件直接用api代替
         }
       }
+      
+
     },
 
     // Various Dev Server settings
@@ -53,7 +66,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '/miaoproject/',
 
     /**
      * Source Maps

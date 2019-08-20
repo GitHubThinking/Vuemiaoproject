@@ -1,6 +1,6 @@
 <template>
   <div class="movie_body" ref="movie_body">
-    <Loading v-if="isLoading"/>
+    <Loading v-if="isLoading" />
     <scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
       <ul>
         <li class="pullDowm">{{pullDownMsg}}</li>
@@ -36,12 +36,14 @@ export default {
     };
   },
   activated() {
+
     var cityId = this.$store.state.city.id
-    if( this.preCityid === cityId){return ;}
+    if( this.preCityid === cityId){console.log('this.preCityid === cityId'); return ;}
     this.isLoading = true
 
     this.axios.get("/api/movieOnInfoList?cityId="+cityId).then(res => {
       if (res.data.msg === "ok") {
+        console.log('res.data.msg ===')
         this.movieList = res.data.data.movieList;
         this.isLoading = false;
         this.preCityid = cityId

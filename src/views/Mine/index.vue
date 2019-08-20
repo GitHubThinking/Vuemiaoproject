@@ -1,7 +1,9 @@
 <template>
   <div>
     <Header title="我的喵喵"></Header>
-    <Login></Login>
+    <div id="content">
+      <router-view />
+    </div>
     <TabBar></TabBar>
   </div>
 </template>
@@ -20,4 +22,5 @@ export default {
 </script>
 
 <style scoped>
+
 </style>

@@ -47,6 +47,7 @@ export default {
     };
   },
   mounted() {
+    console.log("cityList这边的变化"+this.cityList)
     let cityList = window.localStorage.getItem("cityList"),
       hotList = window.localStorage.getItem("hotList");
 
